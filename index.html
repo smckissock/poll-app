@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+
+    <title>Surveys</title>  
+
+    <script src='https://unpkg.com/crossfilter2@1.4.8/crossfilter.js'></script>
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+    <script src='https://unpkg.com/dc@4.2.7/dist/dc.js'></script>
+   
+    <script type="module">
+        import { Survey } from "./app/js/main.js";
+        const survey = new Survey();
+    </script>
+    
+    <link href='https://cdn.jsdelivr.net/npm/dc@4.2.7/dist/style/dc.min.css' rel='stylesheet' type='text/css'>    
+    <link href='app/css/style.css' rel='stylesheet' type='text/css'>
+    <link href='app/css/table.css' rel='stylesheet' type='text/css'>
+    <link href='app/css/filters.css' rel='stylesheet' type='text/css'>
+</head>
+
+<body>  
+    <div id="title">Survey Query
+        <button id="clear-filters" style="float: right;" class="hidden">Clear<br>Filters</button>
+    </div>
+
+    <div id="buttons"></div>
+    <div id="filters"></div>
+
+    <div id="output-buttons" class="tab-container"></div>
+
+    <div id="tab-content">
+        <div id="responses"></div>
+        <div id="charts">
+             <div id="age-plot" class="dc-chart"></div>
+             <div id="income_value-plot" class="dc-chart"></div>
+             <div id="education_level_value-plot" class="dc-chart"></div>
+
+             <div id="state-box-plot" class="dc-chart"></div>
+             <div id="gender-box-plot" class="dc-chart"></div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+    <div id="chart-1">
+        <div id ="gender" class="dc-chart"></div>
+        <div id ="education_level" class="dc-chart"></div>
+        <div id ="city" class="dc-chart"></div>
+    </div>
+    <div id="chart-2">
+        <div id ="income" class="dc-chart"></div>
+        <div id ="sentiment_label" class="dc-chart"></div>
+        <div id ="age" class="dc-chart"></div>
+    </div>
+
+   <div id="loading-overlay">Loading...</div>
+  
+</body>
+</html>
