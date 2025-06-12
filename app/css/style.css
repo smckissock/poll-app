@@ -11,12 +11,13 @@ body {
     
     display: grid;
     grid-template-areas:
-        "title                  title                      filters    "
-        "buttons                buttons                    output-buttons"
-        "map                    map                        tab-content"
-        "chart-1                chart-2                    tab-content";
+        "title                  title                       filters    "
+        "question-group-buttons question-group-buttons      question-group-buttons"
+        "buttons                buttons                     output-buttons"
+        "map                    map                         tab-content"
+        "chart-1                chart-2                     tab-content";
     grid-template-columns: var(--chart-1-width) var(--chart-2-width) 1fr;
-    grid-template-rows: var(--title-height) var(--button-height) var(--map-height) 1fr;
+    grid-template-rows: var(--title-height) var(--button-height) var(--button-height) var(--map-height) 1fr;
     gap: 10px 30px;
     margin: 3px;
     height: 100vh; 
@@ -38,6 +39,10 @@ body {
 
 #buttons {
     grid-area: buttons;
+}
+
+#question-group-buttons {
+    grid-area: question-group-buttons;
 }
 
 #map {
@@ -90,6 +95,21 @@ td {
     color: white;
     border-color: #0056b3;
 }
+
+
+.question-group-button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.question-group-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
 
 .tab-buttons {
     display: flex;
