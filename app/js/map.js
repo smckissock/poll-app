@@ -1,3 +1,4 @@
+import {addCommas} from "./shared.js";
 
 export class Map {
 
@@ -188,9 +189,9 @@ export class Map {
             .data(self.states)
             .enter()
             .append('text')
-                .attr('x', d => size * d.x + margin + 4 )
+                .attr('x', d => size * d.x + margin + 3)
                 .attr('y', d => size * d.y + margin + 26)
-                .text(d => d.responseCount)
+                .text(d => addCommas(d.responseCount))
                 .attr('pointer-events', 'none')
                 .classed('state-response-count', true)  
     }
@@ -199,7 +200,7 @@ export class Map {
         // Update number of responses for each state 
         let responses = dc.facts.allFiltered();
         self.states.forEach(state => {
-           state.responseCount = responses.filter(response => response.state === state.name).length;
+           state.responseCount = responses.filter(response => response.inputstate === state.name).length;
            state.colorIndex = self.calculateColorIndex(state.responseCount);
         });
 
@@ -216,7 +217,7 @@ export class Map {
         this.mapSvg.selectAll('text.state-response-count')
             .transition()
                 .duration(500)
-                .text(d => d.responseCount !== 0 ? d.responseCount : '')
+                .text(d => d.responseCount !== 0 ? addCommas(d.responseCount) : '')
                 .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black');
     }
 }
