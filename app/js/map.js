@@ -1,6 +1,8 @@
 
 export class Map {
 
+    colors = ["#ffffff", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"]
+
     states = [
         { code: 'AK', priority: 0, name: 'Alaska', x: 0,  y: 0 },
         { code: 'ME', priority: 0, name: 'Maine', x: 10, y: 0 },
@@ -62,7 +64,6 @@ export class Map {
         { code: 'FL', priority: 0, name: 'Florida', x: 8,  y: 7 }
     ];
 
-
     constructor(div, responses, dim, refresh) {
         if (dc.stateDimension) {
             dc.stateDimension.filterAll();
@@ -76,15 +77,17 @@ export class Map {
         self.responses = responses;
         self.dim = dim;
         self.refresh = refresh;
+        
+        dc.states = self.states;
+        dc.stateDimension = self.dim;
 
         // Add number of responses for each state 
         self.states.forEach(state => {
-            state.responseCount = self.responses.filter(response => response.state === state.code).length;
+            state.responseCount = self.responses.filter(response => response.inputstate === state.name).length;
             state.colorIndex = self.calculateColorIndex(state.responseCount);
             state.checked = false;
         });
-        dc.states = self.states;
-        dc.stateDimension = self.dim;
+        
         self.show();
     }
 
@@ -100,24 +103,22 @@ export class Map {
                 if (state != aState) 
                     aState.checked = false;
             });
-            this.dim.filter(state.code);
+            this.dim.filter(state.name);
         }
         this.refresh();        
     }
 
-    // This should distribute colors based on counts.. 
-    calculateColorIndex(responseCount) {
-        if (responseCount === 0) 
-            return 0; // White
-        return Math.min(responseCount, 7);
-    }
+    calculateColorIndex(count) {
+        if (count === 0)
+            return 0;
+        const max = dc.stateDimension.group().top(1)[0]?.value || 0;
+        return Math.ceil((count / max) * this.colors.length);
+    }   
 
     makeMap(self) {
         const size = 34;    // Width and height of squares
         const margin = 3;   // Pushes everything down and right
         const gap = 4;      // Space between squares
-
-        this.colors = ["#ffffff", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#084594"]
 
         const cornerRadius = 2;
         const width = size - gap;
@@ -198,7 +199,7 @@ export class Map {
         // Update number of responses for each state 
         let responses = dc.facts.allFiltered();
         self.states.forEach(state => {
-           state.responseCount = responses.filter(response => response.state === state.code).length;
+           state.responseCount = responses.filter(response => response.state === state.name).length;
            state.colorIndex = self.calculateColorIndex(state.responseCount);
         });
 

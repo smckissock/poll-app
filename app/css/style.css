@@ -1,5 +1,5 @@
 :root {
-    --title-height: 90px;  
+    --title-height: 45px;  
     --button-height: 30px;  
     --map-height: 320px;  
     --chart-1-width: 200px;
@@ -27,7 +27,7 @@ body {
 
 #title {
     grid-area: title;  
-    font-size: 36px;
+    font-size: 26px;
     font-weight: 700; 
     padding-top: 10px;
     padding-left: 5px;

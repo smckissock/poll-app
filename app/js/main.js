@@ -118,12 +118,7 @@ export class Survey {
         }
     }
 
-    createDemoCharts(demoQuestions) {
-        const config = {
-            facts: dc.facts,
-            width: 200,
-            updateFunction: this.showSelected
-        };
+    createDemoCharts(demoQuestions) {        
         const rowCharts = [
            { id: "educ", name: "Education" },
            { id: "race", name: "Race" },
@@ -136,13 +131,18 @@ export class Survey {
            { id: "CC24_300b_6", name: "Watch MSNBC" },
            { id: "CC24_309e", name: "Gender" },
         ];
+        
+        const config = {
+            facts: dc.facts,
+            width: 200,
+            updateFunction: this.showSelected
+        };
 
         rowCharts.forEach(chart => {
             new RowChart(chart.id, chart.name, config);
         });
+        dc.map = new Map(d3.select("#map"), this.responses, dc.facts.dimension(dc.pluck("inputstate")), this.showSelected);
     }
-
-
 
     // On start up or when a question button is clicked, get the responses for the question and display them
     async switchQuestion(question) {
@@ -302,6 +302,9 @@ export class Survey {
 
     // Write a simple table of the filtered responses    
     writeResponses(responses) {            
+        console.log("Write Responses");
+        return;
+
         const headers = Object.keys(responses[0])
             .filter(key => key !== "count")
             .sort((a, b) => a === this.question ? 1 : b === this.question ? -1 : 0);
