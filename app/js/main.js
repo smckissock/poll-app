@@ -16,6 +16,11 @@ export class Survey {
         ]);
         
         this.responses = responsesData;
+        this.responses.forEach(d => {
+            d.count = 1;
+        })
+        dc.facts = crossfilter(this.responses);
+
         this.demoQuestions = questionsData
             .filter(q => q.question_type === "Demo")
             .map(q => ({
@@ -25,17 +30,19 @@ export class Survey {
             }));
         this.questionGroups = this.createQuestionGroups(questionsData) 
         this.createQuestionGroupButtons(this.questionGroups) 
-
-        const questions = ["q1_rating", "q2_rating", "q3_open", "q4_rating", "q5_open"];
-        this.createQuestionButtons(questions);
         this.createOutputButtons(["Charts", "Responses"]);
 
         document.getElementById("clear-filters").addEventListener("click", () => {
-            this.switchQuestion(this.question);
+            //this.switchQuestion(this.question);
         });
 
-        this.question = questions[0];
-        this.switchQuestion(this.question);
+        this.createDemoCharts(this.demoQuestions);
+
+         dc.renderAll();
+         //dc.filterAll();
+
+        //this.question = questions[0];
+        //this.switchQuestion(this.question);
     }
 
     // Called in init()
@@ -86,30 +93,6 @@ export class Survey {
                 new RowChart(chart.id, chart.name, config);
             });
         }
-
-        const addScatterPlots = () => {
-            const config = {
-                facts: dc.facts,
-                width: 400,
-                height: 300,
-                updateFunction: this.showSelected.bind(this)
-            };
-    
-            new ScatterPlot("age", this.question, `Age vs ${this.question}`, config);
-            new ScatterPlot("income_value", this.question, `Income vs ${this.question}`, config);
-            new ScatterPlot("education_level_value", this.question, `Education Level vs ${this.question}`, config);
-        };
-
-        // const addBoxPlots = () => {     
-        //     const config = {
-        //         facts: dc.facts,
-        //         width: 400,
-        //         updateFunction: this.showSelected.bind(this)
-        //     };
-        //     new BoxPlot("gender", this.question, `Gender vs ${this.question}`, config);
-        //     new BoxPlot("state", this.question, `State vs ${this.question}`, config);
-        // }        
-        
         this.setLoading(true);
 
         // Clear existing charts and map - important
@@ -121,45 +104,9 @@ export class Survey {
             if (!dc.facts) {
                 this.responses = await d3.csv("./app/data/us_ai_survey_unique_50.csv");
                 dc.facts = crossfilter(this.responses);
-            
-                // this.responses.forEach(d => {
-                //     d.count = 1;
-                //     d.income_value = {
-                //         "Low": 1,
-                //         "Lower-Middle": 2, 
-                //         "Upper-Middle": 3,
-                //         "High": 4
-                //     }[d.income];
-                //     d.education_level_value = {
-                //         "High School": 1,
-                //         "Some College": 2,
-                //         "Associate Degree": 3,
-                //         "Bachelor's Degree": 4,
-                //         "Master's Degree": 5,
-                //         "Doctorate": 6
-                //     }[d.education_level];
-                // })
             }
                         
-            addRowCharts();
-            //dc.map = new Map(d3.select("#map"), this.responses, dc.facts.dimension(dc.pluck("state")), this.showSelected);
-            //addScatterPlots();
-
-
-            // No charts for open questions - no numeric answer to plot against
-            // const openQuestion = this.question.includes("open");
-            // if (!openQuestion) {
-            //     addScatterPlots();
-            //     addBoxPlots();
-            //     this.switchOutput("Charts");
-            // } else {
-            //     this.switchOutput("Responses");
-            // }
-
-            // // Charts don"t make sense for open questions
-            // d3.select("#Charts")
-            //     .style("display", !openQuestion ? "inline-block" : "none");
-            
+            addRowCharts();           
             dc.renderAll();
             dc.filterAll();
             //this.showSelected();
@@ -171,10 +118,35 @@ export class Survey {
         }
     }
 
+    createDemoCharts(demoQuestions) {
+        const config = {
+            facts: dc.facts,
+            width: 200,
+            updateFunction: this.showSelected
+        };
+        const rowCharts = [
+           { id: "educ", name: "Education" },
+           { id: "race", name: "Race" },
+           { id: "hispanic", name: "Hispanic" },
+           { id: "votereg", name: "Voter Registration Status" },
+           { id: "pid7", name: "7 Point Party ID" },
+
+           { id: "CC24_300b_4", name: "Watch CNN"},
+           { id: "CC24_300b_5", name: "Watch Fox News" },
+           { id: "CC24_300b_6", name: "Watch MSNBC" },
+           { id: "CC24_309e", name: "Gender" },
+        ];
+
+        rowCharts.forEach(chart => {
+            new RowChart(chart.id, chart.name, config);
+        });
+    }
+
 
 
     // On start up or when a question button is clicked, get the responses for the question and display them
     async switchQuestion(question) {
+        debugger;
         this.question = question;
 
         const addRowCharts = () => {
@@ -346,28 +318,28 @@ export class Survey {
     }
 
     // Make a button for each question, with a click handler to switch the question
-    createQuestionButtons(questionNames) {
-        const container = document.getElementById("buttons");
-        container.innerHTML = "";
-        const highlightButton = (selectedName) => {
-            d3.selectAll(".question-button")
-                .classed("active", function() {
-                    return d3.select(this).text() === selectedName;
-                });
-        };
+    // createQuestionButtons(questionNames) {
+    //     const container = document.getElementById("buttons");
+    //     container.innerHTML = "";
+    //     const highlightButton = (selectedName) => {
+    //         d3.selectAll(".question-button")
+    //             .classed("active", function() {
+    //                 return d3.select(this).text() === selectedName;
+    //             });
+    //     };
 
-        questionNames.forEach(name => {
-            const button = document.createElement("button");
-            button.textContent = name;
-            button.className = "question-button";
-            button.addEventListener("click", () => {
-                this.switchQuestion(name);
-                highlightButton(name);
-            });
-            container.appendChild(button);
-        });
-        highlightButton(questionNames[0]);
-    }
+    //     questionNames.forEach(name => {
+    //         const button = document.createElement("button");
+    //         button.textContent = name;
+    //         button.className = "question-button";
+    //         button.addEventListener("click", () => {
+    //             this.switchQuestion(name);
+    //             highlightButton(name);
+    //         });
+    //         container.appendChild(button);
+    //     });
+    //     highlightButton(questionNames[0]);
+    // }
 
     createQuestionGroupButtons(questionGroups) {
         const container = document.getElementById("question-group-buttons");
