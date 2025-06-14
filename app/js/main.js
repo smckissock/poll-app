@@ -1,5 +1,6 @@
 import {Map} from "./map.js"; 
 import {RowChart} from "./rowChart.js"; 
+import { BarChart } from "./barChart.js";
 // import {ScatterPlot} from "./scatterPlot.js"; 
 // import {BoxPlot} from "./boxPlot.js";
 
@@ -38,10 +39,6 @@ export class Survey {
         this.createDemoCharts(this.demoQuestions);
 
          dc.renderAll();
-         //dc.filterAll();
-
-        this.questionGroup = this.questionGroups[0];
-        this.switchQuestionGroup(this.questionGroup);
     }
 
     // Called in init()
@@ -74,22 +71,25 @@ export class Survey {
 
     async switchQuestionGroup(questionGroup) {
         this.questionGroup = questionGroup;
+        d3.select("#bar-charts")
+            .html("");
 
+        
+        let config = {
+            facts          : dc.facts,      // required
+            id             : "bar-chart",   // id of the chart container    
+            width          : 400,           // px  (optional)
+            height         : 200,           // px  (optional)
+            gap            : 5,             // px  (optional, space between bars)
+            colors         : ["#83b4db"],   // single or multiple (optional)
+            updateFunction : () => {}       // called on filter (optional)
+        };
+        questionGroup.questions.forEach(q => {
+            new BarChart("bar-chart", q.question_code, q.question, config);
+        });
         d3.select("#filters")
             .text(questionGroup.groupQuestion);
        
-        const container = d3.select("#tab-content").html("");
-        container.selectAll("p")
-            .data(questionGroup.questions)
-            .enter()
-            .append("p")
-            .text(d => d.dcClass + " / " + d.chartType + " - " + d.question);    
-
-        // Clear existing charts and map - important
-        //dc.chartRegistry.clear();
-        //d3.selectAll(".dc-chart").html("");
-        //d3.select("#map").html("");
-        
         dc.renderAll();
     }
 
@@ -188,6 +188,8 @@ export class Survey {
             });
             container.appendChild(button);
         });
+        this.questionGroup = this.questionGroups[0];
+        this.switchQuestionGroup(this.questionGroup);
     };
 
     setLoading(isLoading) {
