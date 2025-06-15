@@ -53,9 +53,9 @@ export class Survey {
             const key = `${question.question_group_name}|${question.question_group_question}`;        
             if (!groupMap[key]) {
                 groupMap[key] = {
-                    groupName: question.question_group_name,
-                    groupQuestion: question.question_group_question,
-                    questions: []
+                    groupName:      question.question_group_name,
+                    groupQuestion:  question.question_group_question,
+                    questions:      []
                 };
             }
             groupMap[key].questions.push({
@@ -73,38 +73,40 @@ export class Survey {
         this.questionGroup = questionGroup;
         d3.select("#bar-charts")
             .html("");
-
+        
+        d3.select("#bar-charts")
+            .append("div")
+            .attr("class", "question-group-text")
+            .html(questionGroup.groupQuestion);
         
         let config = {
-            facts          : dc.facts,      // required
-            id             : "bar-chart",   // id of the chart container    
-            width          : 400,           // px  (optional)
-            height         : 200,           // px  (optional)
-            gap            : 5,             // px  (optional, space between bars)
-            colors         : ["#83b4db"],   // single or multiple (optional)
-            updateFunction : () => {}       // called on filter (optional)
+            facts:          dc.facts,      // required
+            id:             "bar-chart",   // id of the chart container    
+            barWidth:       120,           // px  (optional)
+            height:         200,           // px  (optional)
+            colors:         ["#83b4db"],   // single or multiple (optional)
+            updateFunction: () => {}       // called on filter (optional)
         };
+
         questionGroup.questions.forEach(q => {
             new BarChart("bar-chart", q.question_code, q.question, config);
-        });
-        d3.select("#filters")
-            .text(questionGroup.groupQuestion);
+        });        
        
         dc.renderAll();
     }
 
     createDemoCharts(demoQuestions) {        
         const rowCharts = [
-           { id: "educ", name: "Education" },
-           { id: "race", name: "Race" },
-           { id: "hispanic", name: "Hispanic" },
-           { id: "votereg", name: "Voter Registration Status" },
-           { id: "pid7", name: "7 Point Party ID" },
+           { id: "educ",        name: "Education" },
+           { id: "race",        name: "Race" },
+           { id: "hispanic",    name: "Hispanic" },
+           { id: "votereg",     name: "Voter Registration Status" },
+           { id: "pid7",        name: "7 Point Party ID" },
 
            { id: "CC24_300b_4", name: "Watch CNN"},
            { id: "CC24_300b_5", name: "Watch Fox News" },
            { id: "CC24_300b_6", name: "Watch MSNBC" },
-           { id: "CC24_309e", name: "Gender" },
+           { id: "CC24_309e",   name: "Gender" },
         ];
         
         const config = {
@@ -121,7 +123,8 @@ export class Survey {
 
     // Show current question, filters, and # of responses. Also list the filtered responses
     showSelected = () => {  
-        if (!this.responses || !dc.facts) return;
+        if (!this.responses || !dc.facts) 
+            return;
         //this.showFilters();
 
         dc.map.update();    

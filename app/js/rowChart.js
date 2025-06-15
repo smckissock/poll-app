@@ -22,6 +22,10 @@ export class RowChart {
             .ordinalColors(["#83b4db"])  
             .label(d => `${d.key}  (${d.value.toLocaleString()})`)
             .labelOffsetX(5)
+            .transitionDuration(0)                
+            .on("postRender", c => {                
+                c.transitionDuration(500);        
+            })
             .on('filtered', () => {
                 config.updateFunction()
             })

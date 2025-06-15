@@ -34,12 +34,31 @@
 }
 
 .question-text {
+    text-align: center;
     color: #212529;
-    font-weight: 500;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.chart-wrapper { display:inline-block; }
+
+
+.question-group-text {
+    text-align: center;
+    color: #212529;
+    font-weight: 600;
+    font-size: 18px;
+    margin-top: -10px;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 400px;      /* Specific max width */
+    justify-self: center;  /* Center in grid cell */
 }
 
 .response-count {
