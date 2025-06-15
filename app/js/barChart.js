@@ -14,11 +14,9 @@
 export class BarChart {
     
     constructor(attribute, field, title, config) {
-        const idSel = `#${field}`;
-
         this.dim   = config.facts.dimension(dc.pluck(field));
         this.group = this.dim.group().reduceSum(dc.pluck("count"));
-        const chartWidth = (config.width ?? 120) * this.group.size();
+        const chartWidth = (config.barWidth ?? 120) * this.group.size();
 
         const wrapperDiv = d3.select("#bar-charts")
             .append("div")
@@ -31,15 +29,15 @@ export class BarChart {
             .append("div")
             .attr("id", field);
 
-        const chart = dc.barChart(idSel)
+        const chart = dc.barChart("#" + field)
             .width(chartWidth)                  
             .height(config.height ?? 250)
-            .margins({ top: 20, right: 10, bottom: 30, left: 40 })
+            .margins({ top: 30, right: 40, bottom: 25, left: 40 })
             .dimension(this.dim)
             .group(this.group)
             .x(d3.scaleBand())
             .xUnits(dc.units.ordinal)
-            .gap(10)
+            .gap(6)
             .elasticY(true)
             .ordinalColors(config.colors ?? ["#83b4db"])
             .renderLabel(true)
@@ -52,10 +50,11 @@ export class BarChart {
             .on("postRender", c => {                
                 c.transitionDuration(750);        
             })
-            
-
-        
+                    
         chart.yAxis().ticks(4).tickFormat(d3.format(".2s"));
+
+        // This doesn't work. Need a plan B
+        //this.enableWrappedTicks(chart);
 
         wrapperDiv
             .append("div")
@@ -66,4 +65,71 @@ export class BarChart {
             .style("white-space", "normal")     
             .text(title);
     }
+
+
+/**
+ * Wraps long x-axis tick labels on a dc.js barChart.
+ *
+ * @param {dc.barChart} chart       – your chart instance
+ * @param {number}       estCharW   – avg. character width in px
+ * @param {number}       lineEm     – line height (em) for tspan dy
+ * @param {number}       offsetPx   – downward nudge for the whole label
+ */
+enableWrappedTicks(
+  chart,
+  estCharW  = 6.5,
+  lineEm    = 1.1,
+  offsetPx  = 20
+) {
+  /* -------- 1. give the axis a dynamic tick formatter -------- */
+  const makeFormatter = () => {
+    const barW     = chart.x().bandwidth();            // px
+    const maxChars = Math.floor(barW / estCharW);
+
+    return label => {
+      const words = String(label).split(/\s+/);
+      let line = [], out = [];
+
+      words.forEach(w => {
+        const test = [...line, w].join(" ");
+        if (test.length > maxChars && line.length) {
+          out.push(line.join(" "));
+          line = [w];
+        } else line.push(w);
+      });
+      out.push(line.join(" "));
+      return out.join("\n");                           // keep \n placeholder
+    };
+  };
+
+  chart
+    .on("preRender.wrapTicks", () =>
+      chart.xAxis().tickFormat(makeFormatter())
+    )
+    .on("preRedraw.wrapTicks", () =>
+      chart.xAxis().tickFormat(makeFormatter())
+    );
+
+  /* -------- 2. after dc finishes transitions, replace \n with tspans -------- */
+  chart.on("renderlet.wrapTicks", c => {
+    c.selectAll(".x.axis .tick text").each(function () {
+      const txt    = d3.select(this);
+      const lines  = txt.text().split("\n");
+      if (lines.length === 1) return;                  // nothing to wrap
+
+      txt.text(null);                                  // clear original
+      lines.forEach((l, i) =>
+        txt.append("tspan")
+           .attr("x", 0)
+           .attr("dy", i ? lineEm + "em" : 0)
+           .text(l)
+      );
+
+      /* nudge the whole multi-line label down */
+      const y0 = +txt.attr("y") || 0;
+      txt.attr("y", y0 + offsetPx);
+    });
+  });
 }
+}
+

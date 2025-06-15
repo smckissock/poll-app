@@ -12,7 +12,7 @@ export class RowChart {
         this.dim = config.facts.dimension(dc.pluck(attribute));
         this.group = this.dim.group().reduceSum(dc.pluck("count"));
         
-        dc.rowChart("#" + attribute)
+        this.chart = dc.rowChart("#" + attribute)
             .dimension(this.dim)
             .group(this.group)
             .width(config.width)
@@ -22,6 +22,7 @@ export class RowChart {
             .ordinalColors(["#83b4db"])  
             .label(d => `${d.key}  (${d.value.toLocaleString()})`)
             .labelOffsetX(5)
+            //.classed("demo-row-chart", true)
             .transitionDuration(0)                
             .on("postRender", c => {                
                 c.transitionDuration(500);        
@@ -29,6 +30,13 @@ export class RowChart {
             .on('filtered', () => {
                 config.updateFunction()
             })
-            .xAxis().ticks(4).tickFormat(d3.format(".2s"));
+            
+        this.chart.xAxis().ticks(4).tickFormat(d3.format(".2s"));
+    }
+
+    // Set this to zero to disable transitions when questions change. 
+    // postRender will turn them back on so transitions on filtering will work 
+    transitionDuration(duration) {
+        return this.chart.transitionDuration(duration);
     }
 }

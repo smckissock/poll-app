@@ -29,6 +29,9 @@ export class Survey {
                 question_label: q.question_label,
                 question: q.question
             }));
+        this.createDemoCharts(this.demoQuestions);
+
+
         this.questionGroups = this.createQuestionGroups(questionsData) 
         this.createQuestionGroupButtons(this.questionGroups) 
 
@@ -36,7 +39,7 @@ export class Survey {
             //this.switchQuestion(this.question);
         });
 
-        this.createDemoCharts(this.demoQuestions);
+        // this.createDemoCharts(this.demoQuestions);
 
          dc.renderAll();
     }
@@ -82,7 +85,7 @@ export class Survey {
         let config = {
             facts:          dc.facts,      // required
             id:             "bar-chart",   // id of the chart container    
-            barWidth:       120,           // px  (optional)
+            barWidth:       80,            // px  (optional)
             height:         200,           // px  (optional)
             colors:         ["#83b4db"],   // single or multiple (optional)
             updateFunction: () => {}       // called on filter (optional)
@@ -92,6 +95,7 @@ export class Survey {
             new BarChart("bar-chart", q.question_code, q.question, config);
         });        
        
+        dc.demoCharts.forEach(chart => chart.transitionDuration(0));   
         dc.renderAll();
     }
 
@@ -115,8 +119,9 @@ export class Survey {
             updateFunction: this.showSelected
         };
 
+        dc.demoCharts = [];
         rowCharts.forEach(chart => {
-            new RowChart(chart.id, chart.name, config);
+            dc.demoCharts.push(new RowChart(chart.id, chart.name, config));
         });
         dc.map = new Map(d3.select("#map"), this.responses, dc.facts.dimension(dc.pluck("inputstate")), this.showSelected);
     }
