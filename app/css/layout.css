@@ -1,0 +1,79 @@
+:root {
+    --title-height: 45px;  
+    --button-height: 70px;  
+    --map-height: 320px;  
+
+    --chart-1-width: 200px;
+    --chart-2-width: 200px;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    
+    display: grid;
+    grid-template-areas:
+        "title                  title                       filters    "
+        "question-group-buttons question-group-buttons      question-group-buttons"
+        "map                    map                         tab-content"
+        "chart-1                chart-2                     tab-content";
+    grid-template-columns: var(--chart-1-width) var(--chart-2-width) 1fr;
+    grid-template-rows: var(--title-height) var(--button-height) var(--map-height) 1fr;
+    gap: 10px 30px;
+    margin: 3px;
+    min-height: 100vh; 
+    width: calc(100vw - 1.1rem);   
+} 
+
+
+#title {
+    grid-area: title;  
+    font-size: 26px;
+    font-weight: 700; 
+    padding-top: 5px;
+    padding-left: 5px;
+}
+
+#upload {
+    grid-area: upload;
+}
+
+#buttons {
+    grid-area: buttons;
+}
+
+#question-group-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    grid-area: question-group-buttons;
+}
+
+#map {
+    grid-area: map;
+}
+
+#filters {
+    grid-area: filters;
+}
+
+#chart-1 {
+    grid-area: chart-1;   
+}
+
+#output-buttons {
+    grid-area: output-buttons;
+}
+
+#chart-2 {
+    grid-area: chart-2;
+}
+
+#tab-content {
+    grid-area: tab-content;    
+}
+
+
+.dc-chart .row text {
+  fill: black !important;
+}
