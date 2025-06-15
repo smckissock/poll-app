@@ -31,15 +31,8 @@ export class Survey {
             }));
         this.createDemoCharts(this.demoQuestions);
 
-
         this.questionGroups = this.createQuestionGroups(questionsData) 
         this.createQuestionGroupButtons(this.questionGroups) 
-
-        document.getElementById("clear-filters").addEventListener("click", () => {
-            //this.switchQuestion(this.question);
-        });
-
-        // this.createDemoCharts(this.demoQuestions);
 
          dc.renderAll();
     }
@@ -96,6 +89,7 @@ export class Survey {
         });        
        
         dc.demoCharts.forEach(chart => chart.transitionDuration(0));   
+        this.showFilters();
         dc.renderAll();
     }
 
@@ -126,15 +120,14 @@ export class Survey {
         dc.map = new Map(d3.select("#map"), this.responses, dc.facts.dimension(dc.pluck("inputstate")), this.showSelected);
     }
 
-    // Show current question, filters, and # of responses. Also list the filtered responses
+    // Show current question, filters, and # of responses. 
     showSelected = () => {  
         if (!this.responses || !dc.facts) 
             return;
-        //this.showFilters();
+        this.showFilters();
 
         dc.map.update();    
         dc.redrawAll();
-        //this.writeResponses(dc.facts.allFiltered());
     }
 
     showFilters() {
@@ -146,26 +139,13 @@ export class Survey {
         dc.chartRegistry.list().forEach(chart => {
             chart.filters().forEach(filter => filters.push(filter));
         });
-
-        // Don't show clear filters button if no filters 
-        const hasFilters = filters.length > 0 && filters.some(f => f !== "All states");
-        const clearButton = document.getElementById("clear-filters");
-        clearButton.classList.toggle("hidden", !hasFilters);
         
         const responses = dc.facts.allFiltered().length;
         d3.select("#filters")
             .html(`
                 <div class="filter-container">
-                    <div class="filter-header">
-                        <div class="question-section">
-                            <span class="question-label">Question:</span>
-                            <span class="question-text">${this.question}</span>
-                        </div>
-                        <div class="response-count">
-                            <span class="count-number">${responses}</span>
-                            <span class="count-label">responses</span>
-                        </div>
-                    </div>
+                    <button id="clear-filters" style="float: right;">Clear<br>Filters</button>
+
                     <div class="active-filters">
                         <span class="filters-label">Filters:</span>
                     <div class="filter-tags">
@@ -174,6 +154,18 @@ export class Survey {
                 </div>
             </div>
         `);
+
+        const hasFilters = filters.length > 0 && filters.some(f => f !== "All states");
+        d3.select("#clear-filters")
+            .classed("hidden", !hasFilters)
+            .on("click", () => {
+            
+            dc.filterAll();
+            dc.map.clear();
+
+            this.showFilters();
+            dc.renderAll();
+        });
     }
 
     createQuestionGroupButtons(questionGroups) {

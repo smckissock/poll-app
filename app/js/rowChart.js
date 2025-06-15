@@ -22,7 +22,6 @@ export class RowChart {
             .ordinalColors(["#83b4db"])  
             .label(d => `${d.key}  (${d.value.toLocaleString()})`)
             .labelOffsetX(5)
-            //.classed("demo-row-chart", true)
             .transitionDuration(0)                
             .on("postRender", c => {                
                 c.transitionDuration(500);        

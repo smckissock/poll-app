@@ -220,4 +220,10 @@ export class Map {
                 .text(d => d.responseCount !== 0 ? addCommas(d.responseCount) : '')
                 .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black');
     }
+ 
+    clear() {
+        dc.map.dim.filterAll();
+        dc.states.forEach(state => state.checked = false);
+        dc.map.update();
+    }
 }
