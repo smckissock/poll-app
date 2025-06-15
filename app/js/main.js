@@ -85,13 +85,30 @@ export class Survey {
         };
 
         questionGroup.questions.forEach(q => {
-            new BarChart("bar-chart", q.question_code, q.question, config);
+            this.renderChart(q, config);
         });        
        
         this.highlightButton(this.questionGroup.groupName); 
         dc.demoCharts.forEach(chart => chart.transitionDuration(0));   
         this.showFilters();
         dc.renderAll();
+    }
+
+    renderChart(q, config) {
+        switch (q.chartType) {
+            case "stackedBinary":
+            case "stackedLikert5":
+            case "stackedLikert7":
+                new BarChart("bar-chart", q.question_code, q.question, config);
+                break;
+            case "row3Cat":
+            case "rowMultiCat":
+                new BarChart("bar-chart", q.question_code, q.question, config);
+                //new RowChart("bar-chart", q.question_code, q.question, config);
+                break;
+            default:
+                console.warn(`Unknown chart type for ${q.question_code}: ${q.chartType}`);
+        }
     }
 
     createDemoCharts(demoQuestions) {        
