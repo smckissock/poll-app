@@ -100,11 +100,12 @@ export class Survey {
            { id: "hispanic",    name: "Hispanic" },
            { id: "votereg",     name: "Voter Registration Status" },
            { id: "pid7",        name: "7 Point Party ID" },
+           { id: "CC24_309e",   name: "General Health"},
 
            { id: "CC24_300b_4", name: "Watch CNN"},
            { id: "CC24_300b_5", name: "Watch Fox News" },
            { id: "CC24_300b_6", name: "Watch MSNBC" },
-           { id: "CC24_309e",   name: "Gender" },
+           { id: "gender4",     name: "Gender" },
         ];
         
         const config = {
