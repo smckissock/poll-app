@@ -88,6 +88,7 @@ export class Survey {
             new BarChart("bar-chart", q.question_code, q.question, config);
         });        
        
+        this.highlightButton(this.questionGroup.groupName); 
         dc.demoCharts.forEach(chart => chart.transitionDuration(0));   
         this.showFilters();
         dc.renderAll();
@@ -169,15 +170,29 @@ export class Survey {
         });
     }
 
+highlightButton = (selectedName) => {
+    console.log("highlightButton called with selectedName:", selectedName);
+    
+    // Remove active class from all buttons first
+    d3.selectAll(".question-group-button").classed("active", false);
+    
+    // Then add it to matching buttons
+    d3.selectAll(".question-group-button")
+        .filter(function() {
+            const buttonText = d3.select(this).text();
+            const isMatch = buttonText === selectedName;
+            console.log(`Button text: "${buttonText}", Match: ${isMatch}`);
+            return isMatch;
+        })
+        .classed("active", true);
+    
+    // Verify the result
+    console.log("Buttons with active class:", d3.selectAll(".question-group-button.active").size());
+};
+
     createQuestionGroupButtons(questionGroups) {
         const container = document.getElementById("question-group-buttons");
         container.innerHTML = ""; 
-        const highlightButton = (selectedName) => {
-            d3.selectAll(".question-group-button")
-                .classed("active", function() {
-                    return d3.select(this).text() === selectedName;
-                });
-        };
 
         questionGroups.forEach(group => {
             const button = document.createElement("button");
@@ -185,7 +200,7 @@ export class Survey {
             button.className = "question-group-button";
             button.addEventListener("click", () => {
                 this.switchQuestionGroup(group);
-                highlightButton(group.groupName);
+                //highlightButton(group.groupName);
             });
             container.appendChild(button);
         });

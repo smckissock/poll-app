@@ -164,16 +164,23 @@
     white-space: nowrap;
 }
 
-.question-group-button:hover {
-    background-color: #f0f4ff;
-    color: #004085;
-    border-color: #b3d7ff;
+.question-group-button.active:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    color: white;
 }
 
-.question-group-button:active {
-    background-color: #dceeff;
-    border-color: #99cfff;
-    color: #003768;
+.question-group-button.active {
+    background-color: #1a365c;
+    color: white;
+    border-color: #1a365c;
+}
+
+/* Hover for non-active buttons */
+.question-group-button:not(.active):hover {
+    background-color: #e2e8f0;
+    color: #1a365c;
+    border-color: #94a3b8;
 }
 
 .question-group-button:focus {
