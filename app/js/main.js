@@ -1,3 +1,5 @@
+import { tableFromIPC } from "https://cdn.jsdelivr.net/npm/apache-arrow@14.0.2/+esm";
+
 import {Map} from "./map.js"; 
 import {RowChart} from "./rowChart.js"; 
 import { BarChart } from "./barChart.js";
@@ -11,14 +13,21 @@ export class Survey {
     }
 
     async init() {
+        d3.select("#loading-overlay").classed("show", true);
         const [responsesData, questionsData] = await Promise.all([
-            d3.csv("app/data/responses.csv"),
+            this.loadArrowData("app/data/responses.arrow"),
             d3.csv("app/data/questions.csv")
         ]);
+        d3.select("#loading-overlay").classed("show", false);
         
         this.responses = responsesData;
         this.responses.forEach(d => {
             d.count = 1;
+            // Replace nulls with empty strings for all fields
+            Object.keys(d).forEach(key => {
+                if (d[key] === null || d[key] === undefined) 
+                    d[key] = "";
+            });
         })
         dc.facts = crossfilter(this.responses);
 
@@ -34,7 +43,26 @@ export class Survey {
         this.questionGroups = this.createQuestionGroups(questionsData) 
         this.createQuestionGroupButtons(this.questionGroups) 
 
-         dc.renderAll();
+        dc.renderAll();
+    }
+
+    async loadArrowData(path) {
+        const response = await fetch(path);
+        const buffer = await response.arrayBuffer();
+        
+        const table = tableFromIPC(buffer);
+        const rows = [];
+        for (let i = 0; i < table.numRows; i++) {
+            const row = {};
+        
+            for (let j = 0; j < table.numCols; j++) {
+                const field = table.schema.fields[j];
+                const column = table.getChildAt(j);
+                row[field.name] = column.get(i);
+            }
+            rows.push(row);
+        }
+        return rows;
     }
 
     // Called in init()
@@ -144,7 +172,6 @@ export class Survey {
         if (!this.responses || !dc.facts) 
             return;
         this.showFilters();
-
         dc.map.update();    
         dc.redrawAll();
     }
@@ -187,25 +214,18 @@ export class Survey {
         });
     }
 
-highlightButton = (selectedName) => {
-    console.log("highlightButton called with selectedName:", selectedName);
+    highlightButton = (selectedName) => {
+        d3.selectAll(".question-group-button").classed("active", false);
     
-    // Remove active class from all buttons first
-    d3.selectAll(".question-group-button").classed("active", false);
-    
-    // Then add it to matching buttons
-    d3.selectAll(".question-group-button")
-        .filter(function() {
-            const buttonText = d3.select(this).text();
-            const isMatch = buttonText === selectedName;
-            console.log(`Button text: "${buttonText}", Match: ${isMatch}`);
-            return isMatch;
-        })
-        .classed("active", true);
-    
-    // Verify the result
-    console.log("Buttons with active class:", d3.selectAll(".question-group-button.active").size());
-};
+        // Then add it to matching buttons
+        d3.selectAll(".question-group-button")
+            .filter(function() {
+                const buttonText = d3.select(this).text();
+                const isMatch = buttonText === selectedName;
+                return isMatch;
+            })
+            .classed("active", true);
+    };
 
     createQuestionGroupButtons(questionGroups) {
         const container = document.getElementById("question-group-buttons");

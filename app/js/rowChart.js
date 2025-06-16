@@ -8,7 +8,7 @@ export class RowChart {
         container.insert('div', ':first-child')
             .attr('class', 'chart-title')
             .text(title);
-        
+
         this.dim = config.facts.dimension(dc.pluck(attribute));
         this.group = this.dim.group().reduceSum(dc.pluck("count"));
         

@@ -10,7 +10,7 @@
     <script src='https://unpkg.com/crossfilter2@1.4.8/crossfilter.js'></script>
     <script src='https://d3js.org/d3.v7.min.js'></script>
     <script src='https://unpkg.com/dc@4.2.7/dist/dc.js'></script>
-   
+       
     <script type="module">
         import { Survey } from "./app/js/main.js";
         const survey = new Survey();
@@ -20,16 +20,19 @@
     <link href='app/css/layout.css' rel='stylesheet' type='text/css'>
     <link href='app/css/table.css' rel='stylesheet' type='text/css'>
     <link href='app/css/style.css' rel='stylesheet' type='text/css'>
+    <link href='app/css/loading.css' rel='stylesheet' type='text/css'>
 </head>
 
 <body>  
+    <div id="loading-overlay" class="loading-hidden">
+        <div class="spinner"></div>
+    </div>
+
     <div id="title">2025 Cooperative Election Study</div>
 
     <div id="buttons"></div>
     <div id="filters"></div>
-
     <div id="question-group-buttons"></div>
-
     <div id="output-buttons" class="tab-container"></div>
 
     <div id="tab-content">
@@ -61,8 +64,5 @@
         <div id ="CC24_300b_5" class="dc-chart"></div>
         <div id ="CC24_300b_6" class="dc-chart"></div>
     </div>
-
-   <div id="loading-overlay">Loading...</div>
-  
 </body>
 </html>
