@@ -3,8 +3,6 @@ import { tableFromIPC } from "https://cdn.jsdelivr.net/npm/apache-arrow@14.0.2/+
 import {Map} from "./map.js"; 
 import {RowChart} from "./rowChart.js"; 
 import { BarChart } from "./barChart.js";
-// import {ScatterPlot} from "./scatterPlot.js"; 
-// import {BoxPlot} from "./boxPlot.js";
 
 
 export class Survey {
@@ -13,17 +11,19 @@ export class Survey {
     }
 
     async init() {
-        d3.select("#loading-overlay").classed("show", true);
+        const loading = (isLoading) => d3.select("#loading-overlay").classed("show", isLoading);
+
+        loading(true);
         const [responsesData, questionsData] = await Promise.all([
             this.loadArrowData("app/data/responses.arrow"),
             d3.csv("app/data/questions.csv")
         ]);
-        d3.select("#loading-overlay").classed("show", false);
+        loading(false);
         
         this.responses = responsesData;
         this.responses.forEach(d => {
             d.count = 1;
-            // Replace nulls with empty strings for all fields
+            // Replace nulls with empty strings for all fields - nulls break dimensions
             Object.keys(d).forEach(key => {
                 if (d[key] === null || d[key] === undefined) 
                     d[key] = "";
@@ -65,12 +65,21 @@ export class Survey {
         return rows;
     }
 
-    // Called in init()
+    // Only called in init()
     createQuestionGroups(questionsData) {
         const groupedQuestions = questionsData.filter(q => 
             q.question_type !== "Demo" && 
             q.question_group_name !== "N/A"
         );
+
+        const parseValues = (raw) => {
+            try {
+                return raw ? JSON.parse(raw.replace(/'/g, '"')) : null;
+            } catch (e) {
+                console.warn("Failed to parse values:", raw);
+                return null;
+            }
+        };
 
         const groupMap = {};
         groupedQuestions.forEach(question => {
@@ -83,11 +92,12 @@ export class Survey {
                 };
             }
             groupMap[key].questions.push({
-                question_code: question.question_code,
+                question_code:  question.question_code,
                 question_label: question.question_label,
-                question: question.question,
-                chartType: question.chart_type,
-                dcClass: question.dc_class
+                question:       question.question,
+                chartType:      question.chart_type,
+                dcClass:        question.dc_class,
+                values:         parseValues(question.values)
             });
         });
         return Object.values(groupMap);
@@ -127,12 +137,11 @@ export class Survey {
             case "stackedBinary":
             case "stackedLikert5":
             case "stackedLikert7":
-                new BarChart("bar-chart", q.question_code, q.question, config);
+                new BarChart(q, config);
                 break;
             case "row3Cat":
             case "rowMultiCat":
-                new BarChart("bar-chart", q.question_code, q.question, config);
-                //new RowChart("bar-chart", q.question_code, q.question, config);
+                new BarChart(q, config);
                 break;
             default:
                 console.warn(`Unknown chart type for ${q.question_code}: ${q.chartType}`);
@@ -167,7 +176,6 @@ export class Survey {
         dc.map = new Map(d3.select("#map"), this.responses, dc.facts.dimension(dc.pluck("inputstate")), this.showSelected);
     }
 
-    // Show current question, filters, and # of responses. 
     showSelected = () => {  
         if (!this.responses || !dc.facts) 
             return;
@@ -215,37 +223,27 @@ export class Survey {
     }
 
     highlightButton = (selectedName) => {
-        d3.selectAll(".question-group-button").classed("active", false);
-    
-        // Then add it to matching buttons
         d3.selectAll(".question-group-button")
-            .filter(function() {
-                const buttonText = d3.select(this).text();
-                const isMatch = buttonText === selectedName;
-                return isMatch;
-            })
-            .classed("active", true);
+            .classed("active", function() {
+                return d3.select(this).text() === selectedName;
+        });
     };
 
     createQuestionGroupButtons(questionGroups) {
-        const container = document.getElementById("question-group-buttons");
-        container.innerHTML = ""; 
+        const container = d3.select("#question-group-buttons");
+        container.selectAll("*").remove();
 
-        questionGroups.forEach(group => {
-            const button = document.createElement("button");
-            button.textContent = group.groupName;
-            button.className = "question-group-button";
-            button.addEventListener("click", () => {
-                this.switchQuestionGroup(group);
-                //highlightButton(group.groupName);
-            });
-            container.appendChild(button);
+        const buttons = container.selectAll(".question-group-button")
+            .data(questionGroups)
+            .enter()
+            .append("button")
+            .attr("class", "question-group-button")
+            .text(d => d.groupName)
+            .on("click", (event, d) => {
+            this.switchQuestionGroup(d);
         });
+
         this.questionGroup = this.questionGroups[0];
         this.switchQuestionGroup(this.questionGroup);
     };
-
-    setLoading(isLoading) {
-        d3.select("#loading-overlay").classed("show", isLoading);
-    }
 }

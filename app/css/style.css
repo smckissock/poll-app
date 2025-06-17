@@ -34,9 +34,9 @@
 .question-text {
     text-align: center;
     color: #212529;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
-    margin-top: -10px;
+    margin-top: -5px;
     margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
@@ -45,6 +45,11 @@
 
 .chart-wrapper {
     display: inline-block;
+}
+
+.chart-title {
+    font-weight: 600;
+    margin-top: 12px;
 }
 
 
@@ -68,6 +73,11 @@
 
 .count-label {
     font-weight: 500;
+}
+
+
+.custom-bar-label {
+    font-weight: 600;
 }
 
 .active-filters {

@@ -191,6 +191,7 @@ export class Map {
             .append('text')
                 .attr('x', d => size * d.x + margin + 3)
                 .attr('y', d => size * d.y + margin + 26)
+                .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black')  
                 .text(d => addCommas(d.responseCount))
                 .attr('pointer-events', 'none')
                 .classed('state-response-count', true)  

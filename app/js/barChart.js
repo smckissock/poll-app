@@ -1,9 +1,5 @@
 /**
- * Wrapper around dc.js barChart, now using percentages instead of counts.
- *
- * @param {string}  attribute   – descriptive name (not currently used)
- * @param {string}  field       – column name used as the X category    
- * @param {string}  title       – text shown above the chart
+ * @param {Object}  question    – code (column), question and field orders
  * @param {Object}  config      – {
  *       facts          : crossfilter,     // required
  *       barWidth       : 100,             // px (optional)
@@ -13,16 +9,20 @@
  *   }
  */
 export class BarChart {
-    constructor(attribute, field, title, config) {
+
+    constructor(question, config) {
+        const field = question.question_code;
+        const title = question.question;
+        const fieldOrders = question.values;
+        console.log(fieldOrders);
+
         this.dim = config.facts.dimension(dc.pluck(field));
 
         // Count responses by category
         const rawGroup = this.dim.group().reduceCount();
-
-        // Create a wrapper group that returns percentages
         const percentGroup = {
             all: () => {
-                const data = rawGroup.all();
+                const data = rawGroup.all().filter(d => d.key !== "");
                 const total = d3.sum(data, d => d.value);
                 return data.map(d => ({
                     key: d.key,
@@ -30,8 +30,12 @@ export class BarChart {
                 }));
             }
         };
-
         this.group = percentGroup;
+
+        // Temporary hack to set bar width from longest label. Need to wrap the label or ?
+        const maxNameLength = this.dim.group().all()
+            .reduce((max, d) => Math.max(max, d.key.toString().length), 0);
+        config.barWidth = (maxNameLength * 2) + 54;
 
         const categoryCount = rawGroup.all().length;
         const chartWidth = (config.barWidth ?? 120) * categoryCount;
@@ -56,22 +60,20 @@ export class BarChart {
             .x(d3.scaleBand())
             .xUnits(dc.units.ordinal)
             .gap(6)
-            .elasticY(true)
+            .elasticY(false)
             .ordinalColors(config.colors ?? ["#83b4db"])
             .renderLabel(false)
-            .title(d => `${d.key}: ${d.value.toFixed(1)}%`)
+            .title(d => `${d.key}: ${d.value.toFixed(0)}%`)
             .on("filtered", () => {
                 if (config.updateFunction)
                     config.updateFunction();
             })
             .transitionDuration(0)
             .on("postRender", c => {
-                c.transitionDuration(750);
-                // Position labels just above x-axis after rendering
+                c.transitionDuration(750);                
                 this.positionLabelsAboveXAxis(c);
             })
-            .on("postRedraw", c => {
-                // Also reposition labels after redraw (filtering, etc.)
+            .on("postRedraw", c => {                
                 this.positionLabelsAboveXAxis(c);
             });
 
@@ -101,7 +103,7 @@ export class BarChart {
         // Calculate position just above x-axis
         const xAxisY = yScale(0) + margins.top;
         const labelOffset = 8; // pixels above x-axis
-        const labelY = xAxisY - labelOffset;
+        const labelY = xAxisY - labelOffset - 2;
 
         // Remove any existing custom labels first
         svg.selectAll("text.custom-bar-label").remove();
@@ -122,7 +124,7 @@ export class BarChart {
             .attr("text-anchor", "middle")
             .style("font-size", "14px")
             .style("fill", "#333")
-            .text(d => `${d.value.toFixed(1)}%`);
+            .text(d => `${d.value.toFixed(0)}%`);
     }
 }
 
