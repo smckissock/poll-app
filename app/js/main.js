@@ -72,12 +72,18 @@ export class Survey {
             q.question_group_name !== "N/A"
         );
 
-        const parseValues = (raw) => {
+        const parseValues = (raw) => {  
             try {
-                return raw ? JSON.parse(raw.replace(/'/g, '"')) : null;
+                if (!raw) return [];
+                    const parsed = JSON.parse(raw.replace(/'/g, '"'));
+
+                return Object.entries(parsed).map(([key, label]) => ({
+                    key,
+                    label
+                }));
             } catch (e) {
                 console.warn("Failed to parse values:", raw);
-                return null;
+                return [];
             }
         };
 
@@ -102,7 +108,7 @@ export class Survey {
         });
         return Object.values(groupMap);
     };
-
+    
     async switchQuestionGroup(questionGroup) {
         this.questionGroup = questionGroup;
         d3.select("#bar-charts")
@@ -141,6 +147,7 @@ export class Survey {
                 break;
             case "row3Cat":
             case "rowMultiCat":
+            case "TBD":
                 new BarChart(q, config);
                 break;
             default:

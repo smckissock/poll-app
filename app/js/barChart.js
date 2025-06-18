@@ -88,6 +88,7 @@ export class BarChart {
             .style("width", "100%")
             .style("word-wrap", "break-word")
             .style("white-space", "normal")
+            //.text(title + " *** " + question.question_label);
             .text(title);
 
         this.chart = chart;
@@ -127,70 +128,3 @@ export class BarChart {
             .text(d => `${d.value.toFixed(0)}%`);
     }
 }
-
-// /**
-//  * Wraps long x-axis tick labels on a dc.js barChart.
-//  *
-//  * @param {dc.barChart} chart       – your chart instance
-//  * @param {number}       estCharW   – avg. character width in px
-//  * @param {number}       lineEm     – line height (em) for tspan dy
-//  * @param {number}       offsetPx   – downward nudge for the whole label
-//  */
-// enableWrappedTicks(
-//   chart,
-//   estCharW  = 6.5,
-//   lineEm    = 1.1,
-//   offsetPx  = 20
-// ) {
-//   /* -------- 1. give the axis a dynamic tick formatter -------- */
-//   const makeFormatter = () => {
-//     const barW     = chart.x().bandwidth();            // px
-//     const maxChars = Math.floor(barW / estCharW);
-
-//     return label => {
-//       const words = String(label).split(/\s+/);
-//       let line = [], out = [];
-
-//       words.forEach(w => {
-//         const test = [...line, w].join(" ");
-//         if (test.length > maxChars && line.length) {
-//           out.push(line.join(" "));
-//           line = [w];
-//         } else line.push(w);
-//       });
-//       out.push(line.join(" "));
-//       return out.join("\n");                           // keep \n placeholder
-//     };
-//   };
-
-//   chart
-//     .on("preRender.wrapTicks", () =>
-//       chart.xAxis().tickFormat(makeFormatter())
-//     )
-//     .on("preRedraw.wrapTicks", () =>
-//       chart.xAxis().tickFormat(makeFormatter())
-//     );
-
-//   /* -------- 2. after dc finishes transitions, replace \n with tspans -------- */
-//   chart.on("renderlet.wrapTicks", c => {
-//     c.selectAll(".x.axis .tick text").each(function () {
-//       const txt    = d3.select(this);
-//       const lines  = txt.text().split("\n");
-//       if (lines.length === 1) return;                  // nothing to wrap
-
-//       txt.text(null);                                  // clear original
-//       lines.forEach((l, i) =>
-//         txt.append("tspan")
-//            .attr("x", 0)
-//            .attr("dy", i ? lineEm + "em" : 0)
-//            .text(l)
-//       );
-
-//       /* nudge the whole multi-line label down */
-//       const y0 = +txt.attr("y") || 0;
-//       txt.attr("y", y0 + offsetPx);
-//     });
-//   });
-// }
-// }
-
