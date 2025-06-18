@@ -14,7 +14,12 @@ export class BarChart {
         const field = question.question_code;
         const title = question.question;
         const fieldOrders = question.values;
-        console.log(fieldOrders);
+
+        // Create a mapping from label to sort order (since data keys are actually the labels)
+        const sortOrderMap = {};
+        fieldOrders.forEach((item, index) => {
+            sortOrderMap[item.label] = String(index).padStart(2, '0'); 
+        });
 
         this.dim = config.facts.dimension(dc.pluck(field));
 
@@ -24,18 +29,30 @@ export class BarChart {
             all: () => {
                 const data = rawGroup.all().filter(d => d.key !== "");
                 const total = d3.sum(data, d => d.value);
-                return data.map(d => ({
-                    key: d.key,
-                    value: total ? (d.value / total * 100) : 0
-                }));
+
+                return data.map(d => {
+                    // Prepend sort order to key for proper sorting
+                    const sortOrder = sortOrderMap[d.key] || ' '; // Default high value for unknown keys
+                    return {
+                        key: `${sortOrder}_${d.key}`,
+                        originalKey: d.key,
+                        value: total ? (d.value / total * 100) : 0
+                    };
+                });
             }
         };
         this.group = percentGroup;
 
+        // Get the display labels from fieldOrders
+        const labelMap = {};
+        fieldOrders.forEach(item => {
+            labelMap[item.key] = item.label;
+        });
+
         // Temporary hack to set bar width from longest label. Need to wrap the label or ?
         const maxNameLength = this.dim.group().all()
             .reduce((max, d) => Math.max(max, d.key.toString().length), 0);
-        config.barWidth = (maxNameLength * 2) + 54;
+        config.barWidth = ((maxNameLength - 4) * 2) + 64;
 
         const categoryCount = rawGroup.all().length;
         const chartWidth = (config.barWidth ?? 120) * categoryCount;
@@ -63,7 +80,7 @@ export class BarChart {
             .elasticY(false)
             .ordinalColors(config.colors ?? ["#83b4db"])
             .renderLabel(false)
-            .title(d => `${d.key}: ${d.value.toFixed(0)}%`)
+            .title(d => `${d.originalKey || d.key.split('_')[1]}: ${d.value.toFixed(0)}%`)
             .on("filtered", () => {
                 if (config.updateFunction)
                     config.updateFunction();
@@ -72,9 +89,11 @@ export class BarChart {
             .on("postRender", c => {
                 c.transitionDuration(750);                
                 this.positionLabelsAboveXAxis(c);
+                this.updateXAxisLabels(c);
             })
             .on("postRedraw", c => {                
                 this.positionLabelsAboveXAxis(c);
+                this.updateXAxisLabels(c);
             });
 
         chart.yAxis()
@@ -88,10 +107,19 @@ export class BarChart {
             .style("width", "100%")
             .style("word-wrap", "break-word")
             .style("white-space", "normal")
-            //.text(title + " *** " + question.question_label);
             .text(title);
 
         this.chart = chart;
+    }
+
+    updateXAxisLabels(chart) {
+        // Update x-axis labels to show original labels instead of prefixed keys
+        const svg = d3.select(`#${chart.anchorName()}`).select("svg");
+        svg.selectAll(".x.axis .tick text")
+            .text(function(d) {
+                // Extract original key from the prefixed key
+                return d.split('_')[1];
+            });
     }
 
     positionLabelsAboveXAxis(chart) {
