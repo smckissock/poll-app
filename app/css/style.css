@@ -160,6 +160,7 @@
 
 .question-group-button {
     color: #333;
+    background-color: #ffffff; /* Light gray background */
     border: 1px solid #ddd;
     border-radius: 100px;
     padding: 6px 8px;
@@ -202,6 +203,19 @@
 .question-group-text {
     text-align: center;
     color: #212529;
+    font-weight: 600;
+    font-size: 18px;
+    margin-top: 5px;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-word;
+    max-width: 500px;
+    justify-self: center;
+}
+
+.question-group-name {
+    text-align: center;
+    color:darkgrey;
     font-weight: 600;
     font-size: 18px;
     margin-top: 5px;

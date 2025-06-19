@@ -43,13 +43,12 @@ export class Survey {
 
     async loadArrowData(path) {
         const response = await fetch(path);
-        const buffer = await response.arrayBuffer();
-        
+        const buffer = await response.arrayBuffer();        
         const table = tableFromIPC(buffer);
+        
         const rows = [];
         for (let i = 0; i < table.numRows; i++) {
-            const row = {};
-        
+            const row = {};        
             for (let j = 0; j < table.numCols; j++) {
                 const field = table.schema.fields[j];
                 const column = table.getChildAt(j);
@@ -132,6 +131,11 @@ export class Survey {
         this.questionGroup = questionGroup;
         d3.select("#bar-charts")
             .html("");
+
+        d3.select("#bar-charts")
+            .append("div")
+            .attr("class", "question-group-name")
+            .html(questionGroup.groupName);
         
         d3.select("#bar-charts")
             .append("div")
@@ -142,7 +146,7 @@ export class Survey {
             facts:          dc.facts,      // required
             id:             "bar-chart",   // id of the chart container    
             barWidth:       80,            // px  (optional)
-            height:         200,           // px  (optional)
+            height:         180,           // px  (optional)
             colors:         ["#83b4db"],   // single or multiple (optional)
             updateFunction: () => {}       // called on filter (optional)
         };

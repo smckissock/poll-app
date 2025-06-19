@@ -74,7 +74,7 @@ export class BarChart {
         const chart = dc.barChart("#" + field)
             .width(chartWidth)
             .height(config.height ?? 250)
-            .margins({ top: 30, right: 40, bottom: 25, left: 40 })
+            .margins({ top: 20, right: 30, bottom: 25, left: 40 })
             .dimension(this.dim)
             .group(this.group)
             .x(d3.scaleBand())

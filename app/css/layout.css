@@ -1,10 +1,10 @@
 :root {
-    --title-height: 45px;  
+    --title-height: 55px;  
     --button-height: 70px;  
     --map-height: 320px;  
 
-    --chart-1-width: 200px;
-    --chart-2-width: 200px;
+    --chart-1-width: 210px;
+    --chart-2-width: 210px;
 }
 
 body {
@@ -18,18 +18,24 @@ body {
         "chart-1                chart-2                     tab-content";
     grid-template-columns: var(--chart-1-width) var(--chart-2-width) 1fr;
     grid-template-rows: var(--title-height) var(--button-height) var(--map-height) 1fr;
-    gap: 10px 30px;
+    gap: 20px 20px;
     margin: 3px;
     min-height: 100vh; 
-    width: calc(100vw - 1.1rem);   
-} 
+    width: 100%;
+
+    padding-left: 15px;
+    padding-right: 10px;
+    
+    background-color: rgba(231, 231, 231, 0.9);
+}
+
 
 
 #title {
     grid-area: title;  
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 700; 
-    padding-top: 5px;
+    padding-top: 10px;
     padding-left: 5px;
 }
 
@@ -71,6 +77,7 @@ body {
 
 #tab-content {
     grid-area: tab-content;    
+    background-color: white;
 }
 
 
