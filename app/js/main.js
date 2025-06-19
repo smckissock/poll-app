@@ -80,24 +80,32 @@ export class Survey {
     }
 
     addQuestionPercentages(questions, responses) {
-        const total = responses.length;
         questions.forEach(question => {
             const code = question.question_code;
+        
+            // Get valid labels for this question
+            const validLabels = new Set(question.values.map(v => v.label));
 
-            // Count frequency of each value for the question
+            // Count frequency of each value for the question (only valid ones)
             const counts = {};
+            let validResponseCount = 0;
+        
             responses.forEach(resp => {
                 const answer = resp[code];
-                if (answer in counts) 
-                    counts[answer]++;
-                 else 
-                    counts[answer] = 1;
+                if (validLabels.has(answer)) {
+                    if (answer in counts) 
+                        counts[answer]++;
+                    else 
+                        counts[answer] = 1;
+                    validResponseCount++;
+                }
             });
 
             // Assign percentage to each value in question.values
             question.values.forEach(v => {
                 const count = counts[v.label] || 0;
-                v.percentage = +(100 * count / total).toFixed(1); // rounded to 1 decimal
+                v.percentage = validResponseCount > 0 ? 
+                    +(100 * count / validResponseCount).toFixed(1) : 0;
             });
         });
     }
@@ -227,6 +235,11 @@ export class Survey {
         const responses = dc.facts.allFiltered().length;
         d3.select("#filters")
             .html(`
+                <div class="national-survey-header">
+                    <div class="red-line"></div>
+                    <span class="national-survey-text">National Survey Results</span>
+                </div>
+
                 <div class="filter-container">
                     <button id="clear-filters" style="float: right;">Clear<br>Filters</button>
 

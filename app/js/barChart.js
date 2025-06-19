@@ -96,12 +96,12 @@ export class BarChart {
                 this.chart.selectAll("rect.bar").on("click", null);              
                 this.positionLabelsAboveXAxis(c);
                 this.updateXAxisLabels(c);
-                this.addUsLines(c);
+                this.addNationalLines(c);
             })
             .on("postRedraw", c => {                
                 this.positionLabelsAboveXAxis(c);
                 this.updateXAxisLabels(c);
-                this.addUsLines(c);
+                this.addNationalLines(c);
             });
 
         chart.yAxis()
@@ -164,7 +164,7 @@ export class BarChart {
             .text(d => `${d.value.toFixed(0)}%`);
     }
 
-    addUsLines(chart) {
+    addNationalLines(chart) {
         // Get the chart's SVG and scales
         const svg = d3.select(`#${chart.anchorName()}`).select("svg");
         const yScale = chart.y();
@@ -182,7 +182,7 @@ export class BarChart {
             // Remove old bars with transition
             referenceBars.exit()
                 .transition()
-                .duration(750)
+                .duration(250)
                 .style("opacity", 0)
                 .remove();
 
@@ -196,7 +196,7 @@ export class BarChart {
                 })
                 .attr("x2", d => {
                     const bandWidth = xScale.bandwidth();
-                    return xScale(d.key) + bandWidth + margins.left;
+                    return xScale(d.key) + bandWidth + margins.left - (this.gap / 2) + 2;
                 })
                 .attr("y1", d => {
                     const originalKey = d.originalKey || d.key.split('_')[1];
@@ -230,7 +230,7 @@ export class BarChart {
                 })
                 .attr("x2", d => {
                     const bandWidth = xScale.bandwidth();
-                    return xScale(d.key) + bandWidth + margins.left;
+                    return xScale(d.key) + bandWidth + margins.left - (this.gap / 2) + 2; // Adjust for gap
                 })
                 .attr("y1", d => {
                     const originalKey = d.originalKey || d.key.split('_')[1];

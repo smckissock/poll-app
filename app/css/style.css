@@ -275,3 +275,43 @@ td {
     text-align: center;
     line-height: 1.5;
 }
+
+.title-links {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    font-weight: normal;
+    color: #222;
+    margin-top: 2px;
+    line-height: 1.4;
+}
+
+.title-links a {
+    color: #012756;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.title-links a:hover {
+    text-decoration: underline;
+}
+
+.national-survey-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.red-line {
+    width: 30px;
+    height: 2px;
+    background-color: #dc3545;
+    margin-right: 10px;
+}
+
+.national-survey-text {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
