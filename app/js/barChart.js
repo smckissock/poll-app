@@ -13,11 +13,11 @@ export class BarChart {
     constructor(question, config) {
         const field = question.question_code;
         const title = question.question;
-        const fieldOrders = question.values;
+        const fieldValues = question.values;
 
         // Create a mapping from label to sort order (since data keys are actually the labels)
         const sortOrderMap = {};
-        fieldOrders.forEach((item, index) => {
+        fieldValues.forEach((item, index) => {
             sortOrderMap[item.label] = String(index).padStart(2, '0'); 
         });
 
@@ -43,9 +43,9 @@ export class BarChart {
         };
         this.group = percentGroup;
 
-        // Get the display labels from fieldOrders
+        // Get the display labels from fieldValues
         const labelMap = {};
-        fieldOrders.forEach(item => {
+        fieldValues.forEach(item => {
             labelMap[item.key] = item.label;
         });
 
@@ -87,7 +87,9 @@ export class BarChart {
             })
             .transitionDuration(0)
             .on("postRender", c => {
-                c.transitionDuration(750);                
+                c.transitionDuration(750);  
+                // Remove click event to prevent filtering on bar click                
+                this.chart.selectAll("rect.bar").on("click", null);              
                 this.positionLabelsAboveXAxis(c);
                 this.updateXAxisLabels(c);
             })

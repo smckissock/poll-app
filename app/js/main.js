@@ -30,17 +30,12 @@ export class Survey {
             });
         })
         dc.facts = crossfilter(this.responses);
-
-        this.demoQuestions = questionsData
-            .filter(q => q.question_type === "Demo")
-            .map(q => ({
-                question_code: q.question_code,
-                question_label: q.question_label,
-                question: q.question
-            }));
+        
         this.createDemoCharts(this.demoQuestions);
 
-        this.questionGroups = this.createQuestionGroups(questionsData) 
+        this.questionList = this.makeQuestionList(questionsData);
+        this.addQuestionPercentages(this.questionList, this.responses) 
+        this.questionGroups = this.createQuestionGroups(this.questionList) 
         this.createQuestionGroupButtons(this.questionGroups) 
 
         dc.renderAll();
@@ -65,30 +60,53 @@ export class Survey {
         return rows;
     }
 
-    // Only called in init()
-    createQuestionGroups(questionsData) {
-        const groupedQuestions = questionsData.filter(q => 
-            q.question_type !== "Demo" && 
-            q.question_group_name !== "N/A"
-        );
-
+    // Return list on non-demo questions with percentages for each response
+    makeQuestionList(questions) {        
         const parseValues = (raw) => {  
-            try {
-                if (!raw) return [];
-                    const parsed = JSON.parse(raw.replace(/'/g, '"'));
-
-                return Object.entries(parsed).map(([key, label]) => ({
-                    key,
-                    label
-                }));
-            } catch (e) {
-                console.warn("Failed to parse values:", raw);
-                return [];
-            }
+            const parsed = JSON.parse(raw.replace(/'/g, '"'));
+            return Object.entries(parsed).map(([key, label]) => ({
+                key,
+                label
+            }));
         };
 
+        let questionList = questions
+            .filter(q => 
+                q.question_type !== "Demo" && 
+                q.question_group_name !== "N/A"
+            );
+
+        questionList.forEach(q => q.values = parseValues(q.values));
+        return questionList;    
+    }
+
+    addQuestionPercentages(questions, responses) {
+        const total = responses.length;
+        questions.forEach(question => {
+            const code = question.question_code;
+
+            // Count frequency of each value for the question
+            const counts = {};
+            responses.forEach(resp => {
+                const answer = resp[code];
+                if (answer in counts) 
+                    counts[answer]++;
+                 else 
+                    counts[answer] = 1;
+            });
+
+            // Assign percentage to each value in question.values
+            question.values.forEach(v => {
+                const count = counts[v.label] || 0;
+                v.percentage = +(100 * count / total).toFixed(1); // rounded to 1 decimal
+            });
+        });
+    }
+
+    // Only called in init()
+    createQuestionGroups(questionList) {    
         const groupMap = {};
-        groupedQuestions.forEach(question => {
+        questionList.forEach(question => {    
             const key = `${question.question_group_name}|${question.question_group_question}`;        
             if (!groupMap[key]) {
                 groupMap[key] = {
@@ -103,7 +121,8 @@ export class Survey {
                 question:       question.question,
                 chartType:      question.chart_type,
                 dcClass:        question.dc_class,
-                values:         parseValues(question.values)
+                //values:         parseValues(question.values)
+                values:         question.values
             });
         });
         return Object.values(groupMap);
