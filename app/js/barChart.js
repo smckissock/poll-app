@@ -15,6 +15,9 @@ export class BarChart {
         const title = question.question;
         const fieldValues = question.values;
 
+        this.fieldValues = fieldValues; // Store fieldValues as instance variable
+        this.gap = 6; // Gap between bars
+
         // Create a mapping from label to sort order (since data keys are actually the labels)
         const sortOrderMap = {};
         fieldValues.forEach((item, index) => {
@@ -76,8 +79,9 @@ export class BarChart {
             .group(this.group)
             .x(d3.scaleBand())
             .xUnits(dc.units.ordinal)
-            .gap(6)
+            .gap(this.gap)
             .elasticY(false)
+            .y(d3.scaleLinear().domain([0, 100]))
             .ordinalColors(config.colors ?? ["#83b4db"])
             .renderLabel(false)
             .title(d => `${d.originalKey || d.key.split('_')[1]}: ${d.value.toFixed(0)}%`)
@@ -92,10 +96,12 @@ export class BarChart {
                 this.chart.selectAll("rect.bar").on("click", null);              
                 this.positionLabelsAboveXAxis(c);
                 this.updateXAxisLabels(c);
+                this.addUsLines(c);
             })
             .on("postRedraw", c => {                
                 this.positionLabelsAboveXAxis(c);
                 this.updateXAxisLabels(c);
+                this.addUsLines(c);
             });
 
         chart.yAxis()
@@ -156,5 +162,88 @@ export class BarChart {
             .style("font-size", "14px")
             .style("fill", "#333")
             .text(d => `${d.value.toFixed(0)}%`);
+    }
+
+    addUsLines(chart) {
+        // Get the chart's SVG and scales
+        const svg = d3.select(`#${chart.anchorName()}`).select("svg");
+        const yScale = chart.y();
+        const xScale = chart.x();
+        const margins = chart.margins();
+
+        // Get the data for updating/entering/exiting
+        const data = chart.group().all();
+        
+        if (this.fieldValues) {
+            // Bind data to reference bars
+            const referenceBars = svg.selectAll("line.reference-bar")
+                .data(data);
+
+            // Remove old bars with transition
+            referenceBars.exit()
+                .transition()
+                .duration(750)
+                .style("opacity", 0)
+                .remove();
+
+            // Add new bars in their final position, just invisible
+            const enterBars = referenceBars.enter()
+                .append("line")
+                .attr("class", "reference-bar")
+                .attr("x1", d => {
+                    const bandWidth = xScale.bandwidth();
+                    return xScale(d.key) + margins.left + (this.gap / 2);
+                })
+                .attr("x2", d => {
+                    const bandWidth = xScale.bandwidth();
+                    return xScale(d.key) + bandWidth + margins.left;
+                })
+                .attr("y1", d => {
+                    const originalKey = d.originalKey || d.key.split('_')[1];
+                    const fieldValue = this.fieldValues.find(fv => fv.label === originalKey);
+                    const percentage = fieldValue ? fieldValue.percentage : 0;
+                    return yScale(percentage) + margins.top;
+                })
+                .attr("y2", d => {
+                    const originalKey = d.originalKey || d.key.split('_')[1];
+                    const fieldValue = this.fieldValues.find(fv => fv.label === originalKey);
+                    const percentage = fieldValue ? fieldValue.percentage : 0;
+                    return yScale(percentage) + margins.top;
+                })
+                .style("stroke", "red")
+                .style("stroke-width", 3)
+                .style("opacity", 0); // Start invisible
+
+            // Fade in new bars
+            enterBars
+                .transition()
+                .duration(750)
+                .style("opacity", 0.8);
+
+            // Update existing bars with position transitions
+            referenceBars
+                .transition()
+                .duration(750)
+                .attr("x1", d => {
+                    const bandWidth = xScale.bandwidth();
+                    return xScale(d.key) + margins.left + (this.gap / 2);
+                })
+                .attr("x2", d => {
+                    const bandWidth = xScale.bandwidth();
+                    return xScale(d.key) + bandWidth + margins.left;
+                })
+                .attr("y1", d => {
+                    const originalKey = d.originalKey || d.key.split('_')[1];
+                    const fieldValue = this.fieldValues.find(fv => fv.label === originalKey);
+                    const percentage = fieldValue ? fieldValue.percentage : 0;
+                    return yScale(percentage) + margins.top;
+                })
+                .attr("y2", d => {
+                    const originalKey = d.originalKey || d.key.split('_')[1];
+                    const fieldValue = this.fieldValues.find(fv => fv.label === originalKey);
+                    const percentage = fieldValue ? fieldValue.percentage : 0;
+                    return yScale(percentage) + margins.top;
+                });
+        }
     }
 }
