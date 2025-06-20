@@ -216,6 +216,7 @@
 .question-group-name {
     text-align: center;
     color:darkgrey;
+    margin-top: 50px;
     font-weight: 600;
     font-size: 18px;
     margin-top: 5px;
@@ -304,6 +305,7 @@ td {
 }
 
 .red-line {
+    margin-top: 20px;
     width: 30px;
     height: 2px;
     background-color: #dc3545;
@@ -311,6 +313,7 @@ td {
 }
 
 .national-survey-text {
+    margin-top: 20px;
     font-weight: bold;
     color: #333;
     font-size: 14px;

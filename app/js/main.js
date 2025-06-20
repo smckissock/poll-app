@@ -6,7 +6,9 @@ import { BarChart } from "./barChart.js";
 
 
 export class Survey {
+
     constructor() {
+        this.currentBarCharts = []; // Sowe can dispose  of them whe questuion group changes
         this.init(); 
     }
 
@@ -82,8 +84,6 @@ export class Survey {
     addQuestionPercentages(questions, responses) {
         questions.forEach(question => {
             const code = question.question_code;
-        
-            // Get valid labels for this question
             const validLabels = new Set(question.values.map(v => v.label));
 
             // Count frequency of each value for the question (only valid ones)
@@ -128,7 +128,6 @@ export class Survey {
                 question:       question.question,
                 chartType:      question.chart_type,
                 dcClass:        question.dc_class,
-                //values:         parseValues(question.values)
                 values:         question.values
             });
         });
@@ -136,7 +135,21 @@ export class Survey {
     };
     
     async switchQuestionGroup(questionGroup) {
+        // Clean up existing bar charts and their dimensions
+        if (this.currentBarCharts) {
+            this.currentBarCharts.forEach(chartInstance => {
+                if (chartInstance.chart) {
+                    chartInstance.chart.filterAll();
+                    dc.deregisterChart(chartInstance.chart);
+                }
+                if (chartInstance.dim) {
+                    chartInstance.dim.dispose();
+                }
+            });
+        }
+        
         this.questionGroup = questionGroup;
+        this.currentBarCharts = [];
         d3.select("#bar-charts")
             .html("");
 
@@ -160,30 +173,35 @@ export class Survey {
         };
 
         questionGroup.questions.forEach(q => {
-            this.renderChart(q, config);
+            const chartInstance = this.renderChart(q, config);
+            if (chartInstance) {
+                this.currentBarCharts.push(chartInstance);
+            }
         });        
-       
+    
         this.highlightButton(this.questionGroup.groupName); 
         dc.demoCharts.forEach(chart => chart.transitionDuration(0));   
         this.showFilters();
         dc.renderAll();
     }
-
+    
     renderChart(q, config) {
+        let chartInstance;
         switch (q.chartType) {
             case "stackedBinary":
             case "stackedLikert5":
             case "stackedLikert7":
-                new BarChart(q, config);
+                chartInstance = new BarChart(q, config);
                 break;
             case "row3Cat":
             case "rowMultiCat":
             case "TBD":
-                new BarChart(q, config);
+                chartInstance = new BarChart(q, config);
                 break;
             default:
                 console.warn(`Unknown chart type for ${q.question_code}: ${q.chartType}`);
         }
+        return chartInstance;
     }
 
     createDemoCharts(demoQuestions) {        
@@ -222,15 +240,18 @@ export class Survey {
         dc.redrawAll();
     }
 
-    showFilters() {
+    getFilterString() {
         let filters = [];
-
         const state = dc.states.find(d => d.checked);
-        filters.push(`${state ? state.name : "All states"}`);
-
+        filters.push(`${state ? state.name : "Nationwide"}`);
         dc.chartRegistry.list().forEach(chart => {
             chart.filters().forEach(filter => filters.push(filter));
         });
+        return filters;
+    }
+
+    showFilters() {
+        let filters = this.getFilterString();
         
         const responses = dc.facts.allFiltered().length;
         d3.select("#filters")
@@ -252,7 +273,7 @@ export class Survey {
             </div>
         `);
 
-        const hasFilters = filters.length > 0 && filters.some(f => f !== "All states");
+        const hasFilters = filters.length > 0 && filters.some(f => f !== "Nationwide");
         d3.select("#clear-filters")
             .classed("hidden", !hasFilters)
             .on("click", () => {
