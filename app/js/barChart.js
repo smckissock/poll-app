@@ -217,13 +217,13 @@ export class BarChart {
             // Fade in new bars
             enterBars
                 .transition()
-                .duration(750)
+                .duration(250)
                 .style("opacity", 0.8);
 
             // Update existing bars with position transitions
             referenceBars
                 .transition()
-                .duration(750)
+                .duration(200)
                 .attr("x1", d => {
                     const bandWidth = xScale.bandwidth();
                     return xScale(d.key) + margins.left + (this.gap / 2);

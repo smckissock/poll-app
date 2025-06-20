@@ -35,8 +35,11 @@ export class Survey {
         
         this.createDemoCharts(this.demoQuestions);
 
+        this.initializeClearFiltersButton();
+
         this.questionList = this.makeQuestionList(questionsData);
         this.addQuestionPercentages(this.questionList, this.responses) 
+
         this.questionGroups = this.createQuestionGroups(this.questionList) 
         this.createQuestionGroupButtons(this.questionGroups) 
 
@@ -88,8 +91,7 @@ export class Survey {
 
             // Count frequency of each value for the question (only valid ones)
             const counts = {};
-            let validResponseCount = 0;
-        
+            let validResponseCount = 0;        
             responses.forEach(resp => {
                 const answer = resp[code];
                 if (validLabels.has(answer)) {
@@ -212,10 +214,6 @@ export class Survey {
            { id: "votereg",     name: "Voter Registration Status" },
            { id: "pid7",        name: "7 Point Party ID" },
            { id: "CC24_309e",   name: "General Health"},
-
-           { id: "CC24_300b_4", name: "Watch CNN"},
-           { id: "CC24_300b_5", name: "Watch Fox News" },
-           { id: "CC24_300b_6", name: "Watch MSNBC" },
            { id: "gender4",     name: "Gender" },
         ];
         
@@ -252,38 +250,36 @@ export class Survey {
 
     showFilters() {
         let filters = this.getFilterString();
-        
         const responses = dc.facts.allFiltered().length;
-        d3.select("#filters")
-            .html(`
-                <div class="national-survey-header">
-                    <div class="red-line"></div>
-                    <span class="national-survey-text">National Survey Results</span>
-                </div>
-
-                <div class="filter-container">
-                    <button id="clear-filters" style="float: right;">Clear<br>Filters</button>
-
-                    <div class="active-filters">
-                        <span class="filters-label">Filters:</span>
-                    <div class="filter-tags">
-                        ${filters.map(filter => `<span class="filter-tag">${filter}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
-        `);
-
         const hasFilters = filters.length > 0 && filters.some(f => f !== "Nationwide");
-        d3.select("#clear-filters")
-            .classed("hidden", !hasFilters)
-            .on("click", () => {
-            
-            dc.filterAll();
-            dc.map.clear();
 
-            this.showFilters();
-            dc.renderAll();
-        });
+        d3.select(".responses-count")
+            .text(`Responses: ${responses.toLocaleString()}`);
+        
+        d3.select(".filter-tags")
+            .html(filters.map(filter => `<span class="filter-tag">${filter}</span>`).join(''));
+        
+        // Show/hide the clear button based on whether there are filters
+        d3.select("#clear-filters")
+            .classed("hidden", !hasFilters);
+    }
+
+    // Add this method to your Survey class to initialize the clear filters button
+    initializeClearFiltersButton() {
+        console.log("Attaching clear filters button handler", d3.select("#clear-filters").node());
+        d3.select("#clear-filters")
+            .on("click", (event) => {
+                console.log("Before preventDefault");
+
+                event.preventDefault();
+                event.stopPropagation();
+                
+                console.log("Clearing filters");
+                dc.filterAll();
+                dc.map.clear(); 
+                // Remove this.showFilters() since dc.renderAll() will trigger showSelected()
+                dc.renderAll();
+            });
     }
 
     highlightButton = (selectedName) => {

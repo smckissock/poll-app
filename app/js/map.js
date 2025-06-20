@@ -143,10 +143,8 @@ export class Map {
                 .attr('x', d => size * d.x + margin)
                 .attr('y', d => size * d.y + margin)
                 .attr('width', width)
-                .attr('height', height)
-                .attr('fill', d => this.colors[d.colorIndex])
-                .attr('stroke', d => d.colorIndex == 0 ? 'gray' : 'black')
-                .attr('stroke-width', d => d.colorIndex != 0 ? 1.0 : 0.5)
+                .attr('height', height)                
+                .attr('fill', "#83b4db")
                 .attr('rx', cornerRadius)
                 .attr('ry', cornerRadius)
                 .attr('cursor', d => d.priority == 0 ? 'default' : 'pointer')
@@ -167,8 +165,7 @@ export class Map {
                 .on('click', function(d) {
                     let state = d3.select(this).datum();
                     state.checked = !state.checked;
-                    if (state.responseCount > 0)
-                        self.selectState(state);
+                    self.selectState(state);
                 })
 
         // Add two-character codes on state squares
@@ -177,11 +174,11 @@ export class Map {
             .enter()
             .append('text')
                 .attr('x', d => size * d.x + margin + 3)
-                .attr('y', d => size * d.y + margin + 14)
+                .attr('y', d => size * d.y + margin + 13)
                 .text(d => d.code)
-                .attr('font-size', '14px')
-                .attr('font-weight', 500)
-                .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black')
+                .attr('font-size', '12px')
+                .attr('font-weight', 300)                
+                .style("fill", "#222")
                 .attr('pointer-events', 'none')
 
         // Add response counts on state squares
@@ -191,7 +188,6 @@ export class Map {
             .append('text')
                 .attr('x', d => size * d.x + margin + 3)
                 .attr('y', d => size * d.y + margin + 26)
-                .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black')  
                 .text(d => addCommas(d.responseCount))
                 .attr('pointer-events', 'none')
                 .classed('state-response-count', true)  
@@ -202,24 +198,17 @@ export class Map {
         let responses = dc.facts.allFiltered();
         self.states.forEach(state => {
            state.responseCount = responses.filter(response => response.inputstate === state.name).length;
-           state.colorIndex = self.calculateColorIndex(state.responseCount);
         });
 
         this.mapSvg.selectAll('rect')
             .transition()
                 .duration(500)
-                .attr('fill', state => this.colors[state.colorIndex])
-            
-        this.mapSvg.selectAll('text')
-            .transition()
-                .duration(500)
-                .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black');   
-
+                .attr('fill', state => state.checked ? "#83b4db" : "#cccccc")
+       
         this.mapSvg.selectAll('text.state-response-count')
             .transition()
                 .duration(500)
                 .text(d => d.responseCount !== 0 ? addCommas(d.responseCount) : '')
-                .attr('fill', d => d.colorIndex > 2 ? 'white' : 'black');
     }
  
     clear() {

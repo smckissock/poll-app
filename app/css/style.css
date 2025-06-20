@@ -89,10 +89,10 @@
 }
 
 .filters-label {
-    font-weight: 600;
-    color: #495057;
+    font-weight: 700;
+    color: #333;
     white-space: nowrap;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .filter-tags {
@@ -301,20 +301,117 @@ td {
 .national-survey-header {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
 }
 
 .red-line {
-    margin-top: 20px;
+    margin-top: 1px;
     width: 30px;
-    height: 2px;
+    height: 3px;
     background-color: #dc3545;
     margin-right: 10px;
 }
 
 .national-survey-text {
-    margin-top: 20px;
+    margin-top: 1px;
     font-weight: bold;
     color: #333;
     font-size: 14px;
+}
+
+
+.responses-count {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+}
+
+
+.left-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.responses-section {
+    display: flex;
+    align-items: center;
+}
+
+.filters-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filters-grid-container {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    height: 100%;
+    padding: 4px;
+    gap: 6px;
+}
+
+.national-survey-header {
+    display: flex;
+    align-items: center;
+}
+
+.responses-section {
+    display: flex;
+    align-items: center;
+}
+
+.filters-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.clear-button-section {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+#clear-filters {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 1;
+    visibility: visible;
+}
+
+#clear-filters.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#clear-filters:hover {
+    background: #0056b3;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+
+#clear-filters:active {
+    background: #004085;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#clear-filters:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
 }
